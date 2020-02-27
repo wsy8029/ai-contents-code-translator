@@ -37,7 +37,7 @@ input_method_dic = {
             "클릭":".get_clicked()",
             "두번 클릭":".get_double_clicked()", "더블 클릭":".get_double_clicked()"
             "누르":".get_pressed()",
-            "켜지":".get_toggled()",
+            # "켜지":".get_toggled()",
 
             #motor
             "각도":".get_degree()",
@@ -106,7 +106,7 @@ cond_dic = {
             "면":"if", "때":"if",
             #condition - 복합 조건(반대의 경우 함축적으로 포함된 경우)          
             "만":"else",
-            "동안":"while",
+            "동안":"while", "고 있을 때":"while",
             "보다 클":">",
             "보다 크거나 같을":">=",
             "일":"==",
