@@ -1,119 +1,51 @@
 from konlpy.tag import Komoran
+import modi_dic
 import modi
 import time
 
-tagger = Komoran()
+tagger = Komoran(userdic='user_dic.txt')
 
-input_module_dic = {
-            #sensor
-            "버튼":"button", 
+def __init__(self):
+    self.input_module_dic = modi_dic.input_module_dic
+    self.input_method_dic = modi_dic.input_method_dic
+    self.output_module_dic = modi_dic.output_module_dic
+    self.output_method_dic = modi_dic.output_method_dic
+    self.cond_dic = modi_dic.cond_dic
 
-            "다이얼":"dial",
+    self.code = ""
 
-            "환경":"env", "environment":"env",
+def init_module(self, sen):
+    # 1. 각 chunk에 대하여 명사(모듈)만 추출하여 선언 (ex: motor = bundle.motors[0])
+    nouns = tagger.nouns(sen) # 명사 형태소 추출
+    print(nouns)
+    for noun in nouns:
+        if noun in self.module_dic:
+            module = find_dic(noun)
+            tmp = module + ' = bundle.' + module + 's[0]'
+            self.code.append(tmp + '\n')
 
-            "gyroscope":"gyro", "자이로":"gyro", "자이로스코프":"gyro",
-
-            "infrared":"ir", "적외선":"ir",
-
-            "마이크":"mic",
-
-            "울트라소닉":"ultrasonic", "초음파":"ultrasonic"
-            }
-
-output_module_dic = {
-            #actuator
-            "디스플레이":"display", "화면":"display",
-
-            "불":"led",
-            
-            "모터":"motor",
-
-            "스피커":"speaker"
-            }
-
-input_method_dic = {
-            #button
-            "클릭":".get_clicked()",
-            "두번 클릭":".get_double_clicked()", "더블 클릭":".get_double_clicked()"
-            "누르":".get_pressed()",
-            # "켜지":".get_toggled()",
-
-            #motor
-            "각도":".get_degree()",
-            "회전속도":".get_turnspeed()",
-
-            #env
-            "온도":".get_temperature()",
-            "습도":".get_humidity()",
-            "밝기":".get_brightness()",
-            "빨강":".get_red()",
-            "초록":".get_green()",
-            "파랑":".get_blue()",
-
-            #gyro
-            "롤":".get_roll()",
-            "피치":".get_picth()",
-            "요":".get_yaw()",
-            "x축 각속도":".get_angular_vel_x()",
-            "y축 각속도":".get_angular_vel_y()",
-            "z축 각속도":".get_angular_vel_z()",
-            "x축 각속도":".get_acceleration_x()",
-            "y축 각속도":".get_acceleration_y()",
-            "z축 각속도":".get_acceleration_z()",
-            "진동":".get_vibration()",
-
-            #ir, ultrasonic
-            "거리":".get_distance()",
-
-            #mic
-            "음량":".get_volume()",
-            "진동수":".get_frequency()"
-            }
-
-output_method_dic = {
-            #display
-            # "띄워":".set_text(,"
-            "비워":".set_clear()",
-
-            #led
-            # "rgb":".set_rgb(",
-            "켜":".set_on()",
-            "꺼":".set_off()",
-            "빨강":".set_red()",
-            "초록":".set_green()",
-            "파랑":".set_blue()",
-
-            #motor
-            # "첫번째 각도":".set_first_degree(",
-            # "두번째 각도":".set_second_degree(",
-            # "첫번째 속도":".set_first_speed(",
-            # "두번째 속도":".set_second_speed(",
-            # "첫번째 토크":".set_first_torque(",
-            # "두번째 토크":".set_second_torque(",
-            # "토크":".set_torque(",
-            # "속도":".set_speed(",
-            # "각도":".set_degree(",
-
-            #speaker
-            # "음정":".set_tune(",
-            # "진동수":".set_frequency(",
-            # "음량":".set_volume(",
-            }
-
-cond_dic = {
-            #condition - 단일 조건
-            "면":"if", "때":"if",
-            #condition - 복합 조건(반대의 경우 함축적으로 포함된 경우)          
-            "만":"else",
-            "동안":"while", "고 있을 때":"while",
-            "보다 클":">",
-            "보다 크거나 같을":">=",
-            "일":"==",
-            "아닐":"!=",
-            "보다 작을":"<",
-            "보다 작거나 같을":"<="
-            }
+def divide(sen):
+    # 0. if 해당 형태소를 기준으로 chunk1 과 chunk2를 나눔
+    # 0-1.if 해당 형태소 추출
+    index = ''
+    pos = tagger.pos(sen)
+    for elem in pos:
+        try:
+            x = cond_dic[elem[0]]
+            if x == 'if':           # if 하나만 넣어도 되는 경우
+                index = elem[0]
+            elif x == 'else':       # else까지 암묵적으로 넣어줘야하는 경우
+                index = elem[0]
+        except:
+            pass
+    print("인덱스 : ", index)
+    # 0-2.조건문 if 해당 형태소를 기준으로 chunk 1,2 분할
+    sen = sen.split(index)
+    chunk1 = sen[0]
+    chunk2 = sen[1]
+    print(chunk1)
+    print(chunk2)
+    return chunk1, chunk2
 
 def get_morph(sen, mor):
     pos = tagger.pos(sen)
@@ -145,32 +77,10 @@ def main():
     sentence = input("Enter: ")
     # sentence = '버튼 누르면 불 켜줘'
     # sentence = '버튼 누를때만 불켜줘'
-    
-
-
 
     print('기본 형태소 분석', tagger.pos(sentence))
     
-    # 0. if 해당 형태소를 기준으로 chunk1 과 chunk2를 나눔
-    # 0-1.if 해당 형태소 추출
-    index = ''
-    pos = tagger.pos(sentence)
-    for elem in pos:
-        try:
-            x = cond_dic[elem[0]]
-            if x == 'if':           # if 하나만 넣어도 되는 경우
-                index = elem[0]
-            elif x == 'else':       # else까지 암묵적으로 넣어줘야하는 경우
-                index = elem[0]
-        except:
-            pass
-    print("인덱스 : ", index)
-    # 0-2.조건문 if 해당 형태소를 기준으로 chunk 1,2 분할
-    sen = sentence.split(index)
-    chunk1 = sen[0]
-    chunk2 = sen[1]
-    print(chunk1)
-    print(chunk2)
+    chunk1, chunk2 = divide(sentence)
     
     # 1. 각 chunk에 대하여 명사(모듈)만 추출하여 선언 (ex: motor = bundle.motors[0])
     nouns = tagger.nouns(sentence) # 명사 형태소 추출
