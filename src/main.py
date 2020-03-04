@@ -1,7 +1,9 @@
-import modi_nlp
+from code_translator import CodeTranslator
 
 def main():
-    modi_nlp.main()
 
+    translator = CodeTranslator()
+    translator.run()
+    
 if __name__ == '__main__':
     main()
