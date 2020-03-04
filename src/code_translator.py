@@ -4,6 +4,7 @@ import modi
 import re
 import time
 import traceback
+import sys
 
 class CodeTranslator(object):
 
@@ -26,7 +27,7 @@ class CodeTranslator(object):
             split_chunk = self.int_divider.split(chunk)
             chunk = self.tagger.pos(split_chunk[0])
             value = split_chunk[1]
-            operand = self.tagger.pos(split_chunk[2])
+            operand = self.tagger.pos(split_chunk[-1])
         else:
             chunk = self.tagger.pos(chunk)
 
@@ -76,8 +77,9 @@ class CodeTranslator(object):
         self.code += f"{self.output_module} = bundle.{self.output_module}s[0]\nwhile True:\n"
 
     def run(self):
-        bundle = modi.MODI()
+        # bundle = modi.MODI()
         sentence = input("Enter: ")
+        print(self.tagger.pos(sentence))
         try:
             chunks = self.cond_divider.split(sentence)
             self.set_modules(chunks)
@@ -95,9 +97,10 @@ class CodeTranslator(object):
                     self.code += f"\twhile {self.convert_input(chunks[0])}:\n\t\t{self.convert_output(chunks[-1])}\n\t\ttime.sleep(1)\n"
                     self.code += f"\telse:\n\t\t{modi_dic.else_dic[self.output_module]}\n\t\ttime.sleep(1)"
             print(self.code)
-            exec(self.code)
+            # exec(self.code)
 
         except:
             traceback.print_exc()
             print("Try again")
-            exit()
+        finally:
+            sys.exit()
