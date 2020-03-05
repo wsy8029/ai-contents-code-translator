@@ -1,21 +1,21 @@
 #module
 input_module_dic = {
         #sensor
-        "버튼":"button", 
-        "다이얼":"dial",
-        "환경":"env", "environment":"env",
-        "gyroscope":"gyro", "자이로":"gyro", "자이로스코프":"gyro",
-        "IR":"ir", "infrared":"ir", "적외선":"ir",
-        "마이크":"mic",
-        "울트라소닉":"ultrasonic", "초음파":"ultrasonic"
+        "버튼":"button", "Button":"button", "button":"button",
+        "다이얼":"dial", "Dial":"dial", "dial":"dial",
+        "환경":"env", "environment":"env", "Environment":"env", "Env":"env", "env":"env",
+        "Gyroscope":"gyro", "gyroscope":"gyro", "Gyro":"gyro", "gyro":"gyro", "자이로":"gyro", "자이로스코프":"gyro",
+        "IR":"ir", "infrared":"ir", "적외선":"ir", "ir":"ir",
+        "마이크":"mic", "Mic":"mic", "mic":"mic",
+        "울트라소닉":"ultrasonic", "초음파":"ultrasonic", "Ultrasonic":"ultrasonic", "ultrasonic":"ultrasonic"
         }
 
 output_module_dic = {
         #actuator
-        "디스플레이":"display", "화면":"display",
-        "불":"led", "led 불":"led", "led불":"led",
-        "모터":"motor",
-        "스피커":"speaker"
+        "디스플레이":"display", "Display":"display", "display":"display",
+        "불":"led", "led 불":"led", "led불":"led", "LED":"led", "led":"led",
+        "모터":"motor", "Motor":"motor", "motor":"motor",
+        "스피커":"speaker", "Speaker":"speaker", "speaker":"speaker"
         }
 
 #condition
@@ -28,8 +28,8 @@ cond_dic = {
 operand_dic = {
         "보다 클":">", "보다 크":">", "크":">",
         "보다 크거나 같":">=",
-        "일":"==", "이":"==",
-        "아닐":"!=",
+        "일":"==",
+        "아닐":"!=", "아니":"!=",
         "보다 작":"<", "작":"<",
         "보다 작거나 같":"<="
         }
@@ -63,9 +63,9 @@ env_dic = {
         "온도":"temperature()",
         "습도":"humidity()",
         "밝기":"brightness()",
-        "빨갛":"red()",
+        "빨갛":"red()", "빨간":"red()", "빨강색":"red()",
         "초록":"green()", "초록색":"green()",
-        "파랗":"blue()"
+        "파랗":"blue()", "파란":"blue()", "파랑색":"blue()"
         }
 
 gyro_dic = {
@@ -115,7 +115,7 @@ led_dic = {
 
         # "rgb":"rgb(",
         "켜":"on()",
-        "끄":"off()",
+        "끄":"off()", "꺼":"off()",
         "빨갛":"red()",
         "초록":"green()",
         "파랗":"blue()"
