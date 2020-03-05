@@ -111,6 +111,7 @@ class CodeTranslator(object):
         while True:
             #input sentence
             sentence = input("Enter: ")
+            sentence = ' '.join(sentence.split())
             #terminate
             if sentence == 'q':
                 break
