@@ -6,26 +6,48 @@
 보다 작	EC
 보다 작거나 같	EC
 
-
+Button
+button
 버튼
+Dial
+dial
 다이얼
+Environment
 environment
+Env
+env
+Gyro
+Gyroscope
+gyro
 gyroscope
 자이로
 자이로스코프
 IR
+Infrared
 infrared
+Ir
+ir
 적외선
+Mic
+mic
 마이크
-울트라소닉
+Ultrasonic
 ultrasonic
+울트라소닉
 초음파
+Display
+display
 디스플레이
-화면
-불
+led
+LED
 led 불
 led불
+불
+Motor
+motor
 모터
+Speaker
+speaker
 스피커
 
 클릭	VV
