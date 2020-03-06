@@ -21,17 +21,18 @@ output_module_dic = {
 #condition
 cond_dic = {
         "면":"if", "때":"if",     
-        "때만":"if else",
-        "동안":"while else", "고 있을 때":"while else", "동안만":"while else", "고 있을 때만":"while else"
+        "때 만":"if else", "때만":"if else", "때 마다":"if else", "때마다":"if else",
+        "동안":"while else", "동안 만":"while else", "동안만":"while else",
+        "고 있을 때":"while else", "고 있을때":"while else",
+        "고 있을 때 만":"while else", "고 있을 때만":"while else", "고 있을때만":"while else", "고 있을때 만":"while else"
         }
 
 operand_dic = {
         "보다 클":">", "보다 크":">", "크":">",
-        "보다 크거나 같":">=",
-        "일":"==",
+        "보다 크거나 같":">=", "이상":">=",
         "아닐":"!=", "아니":"!=",
         "보다 작":"<", "작":"<",
-        "보다 작거나 같":"<="
+        "보다 작거나 같":"<=", "이하":"<="
         }
 
 else_dic = {
