@@ -1,6 +1,7 @@
 from konlpy.tag import Komoran
 import modi_dic
 import modi
+import speech_recognition as sr
 import re
 import time
 import traceback
@@ -37,7 +38,7 @@ class CodeTranslator(object):
 
     #convert input chunks to code
     def convert_input(self, chunk):
-        input_code = ""
+        input_code = f"{self.input_module}.get_"
         chunk, value, operand = self.split_chunk(chunk)
         #module name and method
         for morph in chunk:
@@ -57,7 +58,7 @@ class CodeTranslator(object):
 
     #convert output chunks to code
     def convert_output(self, chunk):
-        output_code = ""
+        output_code = f"{self.output_module}.set_"
         chunk, value, _ = self.split_chunk(chunk)
         #module name and method
         for morph in chunk:
@@ -103,27 +104,43 @@ class CodeTranslator(object):
                 self.code += f"\twhile {self.convert_input(chunks[0])}:\n\t\t{self.convert_output(chunks[-1])}\n\t\ttime.sleep(0.1)\n"
                 self.code += f"\telse:\n\t\t{modi_dic.else_dic[self.output_module]}\n\t\ttime.sleep(0.1)"
 
-    def run(self):
+    def run(self, bundle):
         #initial
-        bundle = modi.MODI()
         sentence = ""
-    
+        type = input("Select Type\nEnter (s) for Speak, (w) for Write: ")
+        r = sr.Recognizer()
+        mic = sr.Microphone()
         while True:
-            #input sentence
-            sentence = input("Enter: ")
-            sentence = ' '.join(sentence.split())
-            #terminate
-            if sentence == 'q':
-                break
-            self.code = ""
-            print(self.tagger.pos(sentence))
             try:
+                #input sentence
+                #write ssentence
+                if type == 'w' or type == 'W':    
+                    sentence = input("Enter sentence: ")
+                #speak sentence
+                else:
+                    with mic as source:
+                        r.adjust_for_ambient_noise(source) 
+                        print('ready')
+                        time.sleep(1)
+                        print('speak')
+                        audio = r.listen(source)
+                        print('end')
+                    sentence = r.recognize_google(audio,language='ko-KR')
+                    print(f"You said: {sentence}")
+
+                sentence = ' '.join(sentence.split())
+                #terminate
+                if sentence == 'q':
+                    break
+                self.code = ""
+                print(self.tagger.pos(sentence))
                 self.create_code(sentence)
                 print(self.code)
                 #break to get new sentence
                 self.code += "\n\tif keyboard.is_pressed(' '):\n\t\tbreak"
                 exec(self.code)
             except:
+                traceback.print_exc()
                 print("Try again")
         bundle.exit()
         sys.exit()
