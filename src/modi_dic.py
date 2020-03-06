@@ -38,7 +38,7 @@ else_dic = {
         "display":"display.set_clear()",
         "led":"led.set_off()",
         "motor":"motor.set_speed(0,0)",
-        "speaker":"speaker.volume(0)"
+        "speaker":"speaker.set_volume(0)"
         }
 
 #input modules
@@ -90,7 +90,7 @@ ultrasonic_dic = {
 
 #output modules
 display_dic = {
-        # "띄우":"text(,"
+        # "띄우":"text(", "띄워":"text(", "보이":"text(", "보여":"text(",
         "비우":"clear()"
         }
 
