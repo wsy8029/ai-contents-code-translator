@@ -5,6 +5,8 @@
 아닐	EC
 보다 작	EC
 보다 작거나 같	EC
+이하
+이상
 
 Button
 button
