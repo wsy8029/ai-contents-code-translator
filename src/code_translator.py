@@ -12,8 +12,8 @@ class CodeTranslator(object):
 
     def __init__(self):
         self.tagger = Komoran(userdic='user_dic.txt')
-        self.cond_divider = re.compile('(고 있을 때만|때만|동안만|고 있을 때|때|동안|만|면)')
-        self.int_divider = re.compile('(\d+(\, \d+)?)')
+        self.cond_divider = re.compile('(고 있을\s?때\s?만|때\s?만|동안\s?만|고 있을\s?때|때\s?마다|때|동안|면)')
+        self.int_divider = re.compile('(\d+(, \d+)?)')
 
         self.input_module = None
         self.output_module = None
@@ -47,10 +47,12 @@ class CodeTranslator(object):
         #methods with return value
         if value != None:
             #operand
+            oper_word = None
             for morph in operand:
                 oper_word = modi_dic.operand_dic.get(morph[0])
                 if oper_word !=None:
                     input_code += f" {oper_word} {value}"
+                    break
             #'이':'==' case
             if oper_word == None:
                 input_code += f" == {value}"
@@ -109,6 +111,7 @@ class CodeTranslator(object):
         sentence = ""
         type = input("Select Type\nEnter (s) for Speak, (w) for Write: ")
         r = sr.Recognizer()
+        r.energy_threshold = 4000
         mic = sr.Microphone()
         while True:
             try:
