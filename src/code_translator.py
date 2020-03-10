@@ -116,8 +116,10 @@ class CodeTranslator(object):
         phrase, value, _ = self.split_phrase(output_phrase)
         #module name and method
         for morph in phrase:
-            if output_dic.get(morph)!=None:
+            try:
                 phrase_code += output_dic[morph]
+            except:
+                pass
         #methods with parameter
         if value != None:
             phrase_code += f"{value})"
@@ -166,7 +168,8 @@ class CodeTranslator(object):
                     pass
         except:
             pass
-        self.code += "while True:\n"
+
+        self.code += "while 1:\n"
         return input_chunk, output_chunk
 
     
