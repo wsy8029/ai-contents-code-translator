@@ -25,6 +25,44 @@ class CodeTranslator(object):
 
         self.code = ""
 
+    #record speech
+    def record(self, r, mic):
+        with mic as source:
+            r.adjust_for_ambient_noise(source)
+            print('ready')
+            time.sleep(1)
+            print('speak')
+            audio = r.listen(source)
+            print('end')
+        sentence = r.recognize_google(audio,language='ko-KR')
+        print(f"You said: {sentence}")
+        return sentence
+
+    #create entire code
+    def create_code(self, sentence):
+        #split chunks into value, operand, and others
+        chunks = self.cond_divider.split(sentence)
+        #set input and output modules and their dictionaries
+        input_chunk, output_chunk = self.set_modules(chunks)
+        #basic: with no condition
+        if len(chunks)==1:
+            basic_code = self.convert_output_chunk(output_chunk).replace('\n\t\t', '\n\t')
+            self.code += f"\t{basic_code}\n\ttime.sleep(0.1)"
+
+        #advanced: with condition
+        else:
+            #if clause
+            if modi_dic.cond_dic[chunks[1]] == "if":
+                self.code += f"\tif {self.convert_input_chunk(input_chunk)}:\n\t\t{self.convert_output_chunk(output_chunk)}\n\t\ttime.sleep(0.1)"
+            #if-else clause
+            elif modi_dic.cond_dic[chunks[1]] == "if else":
+                self.code += f"\tif {self.convert_input_chunk(input_chunk)}:\n\t\t{self.convert_output_chunk(output_chunk)}\n\t\ttime.sleep(0.1)\n"
+                self.code += f"\telse:{self.convert_else()}\n\t\ttime.sleep(0.1)"
+            #while-else clause
+            else:
+                self.code += f"\twhile {self.convert_input_chunk(input_chunk)}:\n\t\t{self.convert_output_chunk(output_chunk)}\n\t\ttime.sleep(0.1)\n"
+                self.code += f"\telse:{self.convert_else()}\n\t\ttime.sleep(0.1)"
+
     #split phrase into value, operand, and others
     '''
     input: 초음파 거리가 30이
@@ -172,8 +210,6 @@ class CodeTranslator(object):
         self.code += "while 1:\n"
         return input_chunk, output_chunk
 
-    
-
     #create code for else statement
     def convert_else(self):
         else_code = ""
@@ -184,54 +220,16 @@ class CodeTranslator(object):
             pass
         return else_code
 
-    #create entire code
-    def create_code(self, sentence):
-        #split chunks into value, operand, and others
-        chunks = self.cond_divider.split(sentence)
-        #set input and output modules and their dictionaries
-        input_chunk, output_chunk = self.set_modules(chunks)
-        #basic: with no condition
-        if len(chunks)==1:
-            basic_code = self.convert_output_chunk(output_chunk).replace('\n\t\t', '\n\t')
-            self.code += f"\t{basic_code}\n\ttime.sleep(0.1)"
-
-        #advanced: with condition
-        else:
-            #if clause
-            if modi_dic.cond_dic[chunks[1]] == "if":
-                self.code += f"\tif {self.convert_input_chunk(input_chunk)}:\n\t\t{self.convert_output_chunk(output_chunk)}\n\t\ttime.sleep(0.1)"
-            #if-else clause
-            elif modi_dic.cond_dic[chunks[1]] == "if else":
-                self.code += f"\tif {self.convert_input_chunk(input_chunk)}:\n\t\t{self.convert_output_chunk(output_chunk)}\n\t\ttime.sleep(0.1)\n"
-                self.code += f"\telse:{self.convert_else()}\n\t\ttime.sleep(0.1)"
-            #while-else clause
-            else:
-                self.code += f"\twhile {self.convert_input_chunk(input_chunk)}:\n\t\t{self.convert_output_chunk(output_chunk)}\n\t\ttime.sleep(0.1)\n"
-                self.code += f"\telse:{self.convert_else()}\n\t\ttime.sleep(0.1)"
-
-    #record speech
-    def record(self, r, mic):
-        with mic as source:
-            r.adjust_for_ambient_noise(source)
-            print('ready')
-            time.sleep(1)
-            print('speak')
-            audio = r.listen(source)
-            print('end')
-        sentence = r.recognize_google(audio,language='ko-KR')
-        print(f"You said: {sentence}")
-        return sentence
-
     def run(self, bundle, r, mic):
         #initial
         sentence = ""
         type = input("Select Type\nEnter (s) for Speak, (w) for Write: ")
         # sr.energy_threshold = 4000
 
-        while True:
+        while 1:
             try:
                 self.initial()
-                #write ssentence
+                #write sentence
                 if type == 'w' or type == 'W':    
                     sentence = input("Enter sentence: ")
                 #speak sentence
