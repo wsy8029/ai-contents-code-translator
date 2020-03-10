@@ -1,7 +1,6 @@
 from konlpy.tag import Komoran
 import modi_dic
 import modi
-import speech_recognition as sr
 import re
 import time
 import traceback
@@ -14,129 +13,233 @@ class CodeTranslator(object):
         self.tagger = Komoran(userdic='user_dic.txt')
         self.cond_divider = re.compile('(고 있을\s?때\s?만|때\s?만|동안\s?만|고 있을\s?때|때\s?마다|때|동안|면)')
         self.int_divider = re.compile('(\d+(, \d+)?)')
+        self.op_divider = re.compile('(고|거나)')
 
-        self.input_module = None
-        self.output_module = None
-        self.input_dic = None
-        self.output_dic = None
+    #initialize for new sentence
+    def initial(self):
+        self.input_module = []
+        self.output_module = []
+
+        self.input_dic = []
+        self.output_dic = []
 
         self.code = ""
 
-    #split chunks into value, operand, and others
-    def split_chunk(self, chunk):
+    #split phrase into value, operand, and others
+    '''
+    input: 초음파 거리가 30이
+    returns:    phrase - ['초음파', '거리', '가']
+                value - 30
+                operand - '이'
+    '''
+    def split_phrase(self, phrase):
         operand = None
         value = None
         #extract integer(parameter) of module method
-        if self.int_divider.search(chunk) != None:
-            split_chunk = self.int_divider.split(chunk)
-            chunk = self.tagger.pos(split_chunk[0])
-            value = split_chunk[1]
-            operand = self.tagger.pos(split_chunk[-1])
+        if self.int_divider.search(phrase) != None:
+            parts = self.int_divider.split(phrase)
+            phrase = self.tagger.morphs(parts[0])
+            value = parts[1]
+            operand = self.tagger.morphs(parts[-1])
         else:
-            chunk = self.tagger.pos(chunk)
-        return chunk, value, operand
+            phrase = self.tagger.morphs(phrase)
+        return phrase, value, operand
 
     #convert input chunks to code
-    def convert_input(self, chunk):
-        input_code = f"{self.input_module}.get_"
-        chunk, value, operand = self.split_chunk(chunk)
+    '''
+    input:  '버튼 누르거나 초음파 거리가 30이'
+    returns:    'button.get_pressed() or ultrasonic.get_distance()==30'
+    '''
+    def convert_input_chunk(self, input_chunk):
+        input_code = ""
+        try:
+            input_code += self.convert_input_phrase(input_chunk[0], 0)
+            input_code += f" {modi_dic.operand_dic[input_chunk[1]]} "
+            input_code += self.convert_input_phrase(input_chunk[2], 1)
+        except:
+            pass
+        return input_code
+    
+    #convert input phrases to code
+    '''
+    input: '버튼 누르'
+    returns: 'button.get_pressed()'
+    '''
+    def convert_input_phrase(self, input_phrase, index):
+        input_module = self.input_module[index]
+        input_dic = self.input_dic[index]
+        phrase_code = f"{input_module}.get_"
+        phrase, value, operand = self.split_phrase(input_phrase)
         #module name and method
-        for morph in chunk:
-                if self.input_dic.get(morph[0])!=None:
-                    input_code += self.input_dic[morph[0]]
+        for morph in phrase:
+            try:
+                phrase_code += input_dic[morph]
+            except:
+                pass
         #methods with return value
         if value != None:
             #operand
             oper_word = None
             for morph in operand:
-                oper_word = modi_dic.operand_dic.get(morph[0])
+                oper_word = modi_dic.operand_dic.get(morph)
                 if oper_word !=None:
-                    input_code += f" {oper_word} {value}"
+                    phrase_code += f" {oper_word} {value}"
                     break
             #'이':'==' case
             if oper_word == None:
-                input_code += f" == {value}"
-        return input_code
+                phrase_code += f" == {value}"
+        return phrase_code
 
     #convert output chunks to code
-    def convert_output(self, chunk):
-        output_code = f"{self.output_module}.set_"
-        chunk, value, _ = self.split_chunk(chunk)
+    '''
+    input:  ' 불 켜고 모터 속도 30으로 해줘'
+    returns:    'led.set_on() and motor.set_speed(30)'
+    '''
+    def convert_output_chunk(self, output_chunk):
+        output_code = ""
+        try:
+            output_code += self.convert_output_phrase(output_chunk[0], 0)
+            output_code += f"\n\t\t{self.convert_output_phrase(output_chunk[2], 1)}"
+        except:
+            pass
+        return output_code
+
+    #convert input phrases to code
+    '''
+    input: ' 불 켜고'
+    returns: 'led.set_on()'
+    '''
+    def convert_output_phrase(self, output_phrase, index):
+        output_module = self.output_module[index]
+        output_dic = self.output_dic[index]
+        phrase_code = f"{output_module}.set_"
+        phrase, value, _ = self.split_phrase(output_phrase)
         #module name and method
-        for morph in chunk:
-            if self.output_dic.get(morph[0])!=None:
-                output_code += self.output_dic[morph[0]]
+        for morph in phrase:
+            if output_dic.get(morph)!=None:
+                phrase_code += output_dic[morph]
         #methods with parameter
         if value != None:
-            output_code += f"{value})"
-        return output_code
-                
+            phrase_code += f"{value})"
+        return phrase_code
+          
     #set input and output modules and their dictionaries
+    '''
+    input: '버튼 누르거나 초음파 거리가 30이면 불 켜고 모터 속도 30으로 해줘'
+    returns: 'button = bundle.buttons[0]\nultrasonic = bundle.ultrasonics[0]\nled = bundle.leds[0]\nmotor = bundle.motors[0]'
+    '''
     def set_modules(self, chunks):
-        if len(chunks) != 1:
-            self.input_module = modi_dic.input_module_dic[self.tagger.nouns(chunks[0])[0]]
-            self.input_dic = getattr(modi_dic, f"{self.input_module}_dic")
-            self.code += f"{self.input_module} = bundle.{self.input_module}s[0]\n"
+        if len(chunks) == 1:
+            input_chunk = None
+            output_chunk = self.op_divider.split(chunks[0])
 
-        self.output_module = modi_dic.output_module_dic[self.tagger.nouns(chunks[-1])[0]]
-        self.output_dic = getattr(modi_dic, f"{self.output_module}_dic")
-        self.code += f"{self.output_module} = bundle.{self.output_module}s[0]\nwhile True:\n"
+        else:
+            input_chunk = self.op_divider.split(chunks[0])
+            output_chunk = self.op_divider.split(chunks[-1])
+
+        try:
+            for input in input_chunk:
+                try:
+                    module = modi_dic.input_module_dic.get(self.tagger.nouns(input)[0])
+                    if module == None:
+                        pass
+                    else:
+                        self.input_module.append(module)
+                        self.input_dic.append(getattr(modi_dic, f"{module}_dic"))
+                        self.code += f"{module} = bundle.{module}s[0]\n"
+                except:
+                    pass
+        except:
+            pass
+
+        try:
+            for output in output_chunk:
+                try:
+                    module = modi_dic.output_module_dic.get(self.tagger.nouns(output)[0])
+                    if module == None:
+                        pass
+                    else:
+                        self.output_module.append(module)
+                        self.output_dic.append(getattr(modi_dic, f"{module}_dic"))
+                        self.code += f"{module} = bundle.{module}s[0]\n"
+                except:
+                    pass
+        except:
+            pass
+        self.code += "while True:\n"
+        return input_chunk, output_chunk
+
+    
+
+    #create code for else statement
+    def convert_else(self):
+        else_code = ""
+        try:
+            for module in self.output_module:
+                else_code += f"\n\t\t{modi_dic.else_dic[module]}"
+        except:
+            pass
+        return else_code
 
     #create entire code
     def create_code(self, sentence):
         #split chunks into value, operand, and others
         chunks = self.cond_divider.split(sentence)
         #set input and output modules and their dictionaries
-        self.set_modules(chunks)
+        input_chunk, output_chunk = self.set_modules(chunks)
         #basic: with no condition
         if len(chunks)==1:
-            self.code += f"\t{self.convert_output(chunks[0])}\n\ttime.sleep(0.1)"
+            basic_code = self.convert_output_chunk(output_chunk).replace('\n\t\t', '\n\t')
+            self.code += f"\t{basic_code}\n\ttime.sleep(0.1)"
 
         #advanced: with condition
         else:
             #if clause
             if modi_dic.cond_dic[chunks[1]] == "if":
-                self.code += f"\tif {self.convert_input(chunks[0])}:\n\t\t{self.convert_output(chunks[-1])}"
+                self.code += f"\tif {self.convert_input_chunk(input_chunk)}:\n\t\t{self.convert_output_chunk(output_chunk)}\n\t\ttime.sleep(0.1)"
             #if-else clause
             elif modi_dic.cond_dic[chunks[1]] == "if else":
-                self.code += f"\tif {self.convert_input(chunks[0])}:\n\t\t{self.convert_output(chunks[-1])}\n\t\ttime.sleep(0.1)\n"
-                self.code += f"\telse:\n\t\t{modi_dic.else_dic[self.output_module]}\n\t\ttime.sleep(0.1)"
+                self.code += f"\tif {self.convert_input_chunk(input_chunk)}:\n\t\t{self.convert_output_chunk(output_chunk)}\n\t\ttime.sleep(0.1)\n"
+                self.code += f"\telse:{self.convert_else()}\n\t\ttime.sleep(0.1)"
             #while-else clause
             else:
-                self.code += f"\twhile {self.convert_input(chunks[0])}:\n\t\t{self.convert_output(chunks[-1])}\n\t\ttime.sleep(0.1)\n"
-                self.code += f"\telse:\n\t\t{modi_dic.else_dic[self.output_module]}\n\t\ttime.sleep(0.1)"
+                self.code += f"\twhile {self.convert_input_chunk(input_chunk)}:\n\t\t{self.convert_output_chunk(output_chunk)}\n\t\ttime.sleep(0.1)\n"
+                self.code += f"\telse:{self.convert_else()}\n\t\ttime.sleep(0.1)"
 
-    def run(self, bundle):
+    #record speech
+    def record(self, r, mic):
+        with mic as source:
+            r.adjust_for_ambient_noise(source)
+            print('ready')
+            time.sleep(1)
+            print('speak')
+            audio = r.listen(source)
+            print('end')
+        sentence = r.recognize_google(audio,language='ko-KR')
+        print(f"You said: {sentence}")
+        return sentence
+
+    def run(self, bundle, r, mic):
         #initial
         sentence = ""
         type = input("Select Type\nEnter (s) for Speak, (w) for Write: ")
-        r = sr.Recognizer()
-        r.energy_threshold = 4000
-        mic = sr.Microphone()
+        # sr.energy_threshold = 4000
+
         while True:
             try:
-                #input sentence
+                self.initial()
                 #write ssentence
                 if type == 'w' or type == 'W':    
                     sentence = input("Enter sentence: ")
                 #speak sentence
                 else:
-                    with mic as source:
-                        r.adjust_for_ambient_noise(source) 
-                        print('ready')
-                        time.sleep(1)
-                        print('speak')
-                        audio = r.listen(source)
-                        print('end')
-                    sentence = r.recognize_google(audio,language='ko-KR')
-                    print(f"You said: {sentence}")
-
+                    sentence = self.record(r, mic)
                 sentence = ' '.join(sentence.split())
                 #terminate
                 if sentence == 'q':
                     break
                 self.code = ""
-                print(self.tagger.pos(sentence))
+                print(self.tagger.morphs(sentence))
                 self.create_code(sentence)
                 print(self.code)
                 #break to get new sentence
