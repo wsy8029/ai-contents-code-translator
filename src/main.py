@@ -9,7 +9,7 @@ def main():
     mic = sr.Microphone()
     translator = CodeTranslator()
     #translate new sentences until exit
-    while True:
+    while 1:
         translator.run(bundle, r, mic)
 
 if __name__ == '__main__':
