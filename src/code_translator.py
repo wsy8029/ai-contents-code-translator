@@ -1,5 +1,6 @@
 from konlpy.tag import Komoran
 import modi_dic
+import text_process
 import modi
 import re
 import time
@@ -178,37 +179,35 @@ class CodeTranslator(object):
             output_chunk = self.op_divider.split(chunks[-1])
 
         try:
-            for input in input_chunk:
-                try:
-                    module = modi_dic.input_module_dic.get(self.tagger.nouns(input)[0])
-                    if module == None:
-                        pass
-                    else:
-                        self.input_module.append(module)
-                        self.input_dic.append(getattr(modi_dic, f"{module}_dic"))
-                        self.code += f"{module} = bundle.{module}s[0]\n"
-                except:
-                    pass
+            self.find_module("input", input_chunk[0])
+            self.find_module("input", input_chunk[2])
         except:
             pass
 
         try:
-            for output in output_chunk:
-                try:
-                    module = modi_dic.output_module_dic.get(self.tagger.nouns(output)[0])
-                    if module == None:
-                        pass
-                    else:
-                        self.output_module.append(module)
-                        self.output_dic.append(getattr(modi_dic, f"{module}_dic"))
-                        self.code += f"{module} = bundle.{module}s[0]\n"
-                except:
-                    pass
+            self.find_module("output", output_chunk[0])
+            self.find_module("output", output_chunk[2])
         except:
             pass
 
         self.code += "while 1:\n"
         return input_chunk, output_chunk
+
+    #edit typo and find module in dic
+    '''
+    input: '버턴 누르면 부ㄹ 켜줘'
+    returns: 'button = bundle.buttons[0]\nled = bundle.leds[0]'
+    '''
+    def find_module(self, type, chunk):
+        chunk = chunk.strip()
+        raw = chunk.split(" ")[0]
+        module = getattr(modi_dic, f'{type}_module_dic').get(raw)
+        #edit typo
+        if module == None:
+            module = getattr(modi_dic, f'{type}_module_dic').get(text_process.edit(type, raw))
+        getattr(self, f'{type}_module').append(module)
+        getattr(self, f'{type}_dic').append(getattr(modi_dic, f'{module}_dic'))
+        self.code += f"{module} = bundle.{module}s[0]\n"
 
     #create code for else statement
     def convert_else(self):
@@ -225,7 +224,6 @@ class CodeTranslator(object):
         sentence = ""
         type = input("Select Type\nEnter (s) for Speak, (w) for Write: ")
         # sr.energy_threshold = 4000
-
         while 1:
             try:
                 self.initial()
