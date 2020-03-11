@@ -13,7 +13,7 @@ class CodeTranslator(object):
     def __init__(self):
         self.tagger = Komoran(userdic='user_dic.txt')
         self.cond_divider = re.compile('(고 있을\s?때\s?만|때\s?만|동안\s?만|고 있을\s?때|때\s?마다|때|동안|면)')
-        self.int_divider = re.compile('(\d+(, \d+)?)')
+        self.int_divider = re.compile('(-?\d+,\s?-?\d+,\s?-?\d+|-?\d+,\s?-?\d+|-?\d+)')
         self.op_divider = re.compile('(고|거나)')
 
     #initialize for new sentence
@@ -245,7 +245,6 @@ class CodeTranslator(object):
                 self.code += "\n\tif keyboard.is_pressed(' '):\n\t\tbreak"
                 exec(self.code)
             except:
-                traceback.print_exc()
                 print("Try again")
         bundle.exit()
         sys.exit()
