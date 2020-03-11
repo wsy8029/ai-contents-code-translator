@@ -46,7 +46,8 @@ else_dic = {
 #input modules
 button_dic = {
         "클릭":"clicked()",
-        "두번 클릭":"double_clicked()", "더블 클릭":"double_clicked()",
+        "두":"double_", "두번":"double_",
+        "더블 클릭":"double_clicked()", "더블클릭":"double_clicked()",
         "누르":"pressed()", "눌리":"pressed()"
         }
 
@@ -59,9 +60,9 @@ env_dic = {
         "온도":"temperature()",
         "습도":"humidity()",
         "밝기":"brightness()",
-        "빨갛":"red()", "빨간":"red()", "빨강색":"red()",
+        "빨갛":"red()", "빨간":"red()", "빨강색":"red()", "빨간색":"red()",
         "초록":"green()", "초록색":"green()",
-        "파랗":"blue()", "파란":"blue()", "파랑색":"blue()"
+        "파랗":"blue()", "파란":"blue()", "파랑색":"blue()", "파란색":"blue()"
         }
 
 gyro_dic = {
@@ -92,7 +93,7 @@ ultrasonic_dic = {
 
 #output modules
 display_dic = {
-        # "띄우":"text(", "띄워":"text(", "보이":"text(", "보여":"text(",
+        "띄우":"text(", "띄워":"text(", "보이":"text(", "보여":"text(",
         "비우":"clear()"
         }
 
@@ -100,9 +101,9 @@ led_dic = {
         "rgb":"rgb(",
         "켜":"on()",
         "끄":"off()", "꺼":"off()",
-        "빨갛":"red()",
-        "초록":"green()",
-        "파랗":"blue()"
+        "빨갛":"red(255)", "빨간":"red(255)", "빨강색":"red(255)", "빨간색":"red(255)",
+        "초록":"green(255)", "초록색":"green(255)",
+        "파랗":"blue(255)", "파란":"blue(255)", "파랑색":"blue(255)", "파란색":"blue(255)"
         }
 
 motor_dic = {
