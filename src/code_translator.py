@@ -47,21 +47,21 @@ class CodeTranslator(object):
         input_chunk, output_chunk = self.set_modules(chunks)
         #basic: with no condition
         if len(chunks)==1:
-            basic_code = self.convert_output_chunk(output_chunk).replace('\n\t\t', '\n\t')
+            basic_code = self.convert_chunk('output', output_chunk).replace('\n\t\t', '\n\t')
             self.code += f"\t{basic_code}\n\ttime.sleep(0.1)"
 
         #advanced: with condition
         else:
             #if clause
             if modi_dic.cond_dic[chunks[1]] == "if":
-                self.code += f"\tif {self.convert_input_chunk(input_chunk)}:\n\t\t{self.convert_output_chunk(output_chunk)}\n\t\ttime.sleep(0.1)"
+                self.code += f"\tif {self.convert_chunk('input', input_chunk)}:\n\t\t{self.convert_chunk('output', output_chunk)}\n\t\ttime.sleep(0.1)"
             #if-else clause
             elif modi_dic.cond_dic[chunks[1]] == "if else":
-                self.code += f"\tif {self.convert_input_chunk(input_chunk)}:\n\t\t{self.convert_output_chunk(output_chunk)}\n\t\ttime.sleep(0.1)\n"
+                self.code += f"\tif {self.convert_chunk('input', input_chunk)}:\n\t\t{self.convert_chunk('output', output_chunk)}\n\t\ttime.sleep(0.1)\n"
                 self.code += f"\telse:{self.convert_else()}\n\t\ttime.sleep(0.1)"
             #while-else clause
             else:
-                self.code += f"\twhile {self.convert_input_chunk(input_chunk)}:\n\t\t{self.convert_output_chunk(output_chunk)}\n\t\ttime.sleep(0.1)\n"
+                self.code += f"\twhile {self.convert_chunk('input', input_chunk)}:\n\t\t{self.convert_chunk('output', output_chunk)}\n\t\ttime.sleep(0.1)\n"
                 self.code += f"\telse:{self.convert_else()}\n\t\ttime.sleep(0.1)"
 
     #split phrase into value, operand, and others
@@ -84,86 +84,75 @@ class CodeTranslator(object):
             phrase = self.tagger.morphs(phrase)
         return phrase, value, operand
 
-    #convert input chunks to code
-    '''
-    input:  '버튼 누르거나 초음파 거리가 30이'
-    returns:    'button.get_pressed() or ultrasonic.get_distance()==30'
-    '''
-    def convert_input_chunk(self, input_chunk):
-        input_code = ""
-        try:
-            input_code += self.convert_input_phrase(input_chunk[0], 0)
-            input_code += f" {modi_dic.operand_dic[input_chunk[1]]} "
-            input_code += self.convert_input_phrase(input_chunk[2], 1)
-        except:
-            pass
-        return input_code
-    
-    #convert input phrases to code
-    '''
-    input: '버튼 누르'
-    returns: 'button.get_pressed()'
-    '''
-    def convert_input_phrase(self, input_phrase, index):
-        input_module = self.input_module[index]
-        input_dic = self.input_dic[index]
-        phrase_code = f"{input_module}.get_"
-        phrase, value, operand = self.split_phrase(input_phrase)
-        #module name and method
-        for morph in phrase:
-            try:
-                phrase_code += input_dic[morph]
-            except:
-                pass
-        #methods with return value
-        if value != None:
-            #operand
-            oper_word = None
-            for morph in operand:
-                oper_word = modi_dic.operand_dic.get(morph)
-                if oper_word !=None:
-                    phrase_code += f" {oper_word} {value}"
-                    break
-            #'이':'==' case
-            if oper_word == None:
-                phrase_code += f" == {value}"
-        return phrase_code
-
-    #convert output chunks to code
+    #convert chunks to code
     '''
     input:  ' 불 켜고 모터 속도 30으로 해줘'
     returns:    'led.set_on() and motor.set_speed(30)'
     '''
-    def convert_output_chunk(self, output_chunk):
-        output_code = ""
+    def convert_chunk(self, type, chunk):
+        code = ""
         try:
-            output_code += self.convert_output_phrase(output_chunk[0], 0)
-            output_code += f"\n\t\t{self.convert_output_phrase(output_chunk[2], 1)}"
+            code += getattr(self, f"convert_phrase")(type, chunk[0], 0)
+            if type == "input":
+                code += f" {modi_dic.operand_dic[chunk[1]]} "
+                code += getattr(self, f"convert_phrase")(type, chunk[2], 1)
+            elif type == "output":
+                code += "\n\t\t"+ getattr(self, f"convert_phrase")(type, chunk[2], 1)
         except:
             pass
-        return output_code
+        return code
 
-    #convert input phrases to code
+    #convert phrases to code
     '''
     input: ' 불 켜고'
     returns: 'led.set_on()'
     '''
-    def convert_output_phrase(self, output_phrase, index):
-        output_module = self.output_module[index]
-        output_dic = self.output_dic[index]
-        phrase_code = f"{output_module}.set_"
-        phrase, value, _ = self.split_phrase(output_phrase)
+    def convert_phrase(self, type, phrase, index):
+        module = getattr(self, f"{type}_module")[index]
+        dic = getattr(self, f"{type}_dic")[index]
+        if type == "output":
+            phrase_code = f"{module}.set_"
+        elif type == "input":
+            phrase_code = f"{module}.get_"
+        phrase, value, operand = self.split_phrase(phrase)
         #module name and method
         for morph in phrase:
             try:
-                phrase_code += output_dic[morph]
+                phrase_code += dic[morph]
             except:
                 pass
-        #methods with parameter
         if value != None:
-            phrase_code += f"{value})"
+            phrase_code += getattr(self, f"set_{type}_param")(value, operand)
         return phrase_code
-          
+
+    #set input parameters to code
+    '''
+    input:  value - 30
+            operand - '보다 크'
+    returns: ' > 30'
+    '''
+    def set_input_param(self, value, operand):
+        param_code = ""
+        #operand
+        oper_word = None
+        for morph in operand:
+            oper_word = modi_dic.operand_dic.get(morph)
+            if oper_word !=None:
+                param_code += f" {oper_word} {value}"
+                break
+        #'이':'==' case
+        if oper_word == None:
+            param_code += f" == {value}"
+        return param_code
+
+    #set output parameters to code
+    '''
+    input:  value - 30
+    returns: '30)'
+    '''
+    def set_output_param(self, value, _):
+        return f"{value})"
+
     #set input and output modules and their dictionaries
     '''
     input: '버튼 누르거나 초음파 거리가 30이면 불 켜고 모터 속도 30으로 해줘'
@@ -195,16 +184,24 @@ class CodeTranslator(object):
 
     #edit typo and find module in dic
     '''
-    input: '버턴 누르면 부ㄹ 켜줘'
+    input: '버턴 누르면 불 켜줘'
     returns: 'button = bundle.buttons[0]\nled = bundle.leds[0]'
     '''
     def find_module(self, type, chunk):
         chunk = chunk.strip()
-        raw = chunk.split(" ")[0]
-        module = getattr(modi_dic, f'{type}_module_dic').get(raw)
-        #edit typo
-        if module == None:
-            module = getattr(modi_dic, f'{type}_module_dic').get(text_process.edit(type, raw))
+        chunk = chunk.split(" ")
+        for raw in chunk:
+            module = getattr(modi_dic, f'{type}_module_dic').get(raw)
+            #edit typo
+            if module == None:
+                word, dist = text_process.edit(type, raw)
+                if dist > 1.0:
+                    continue
+                else:
+                    module = getattr(modi_dic, f'{type}_module_dic')[word]
+                    break
+            else:
+                break
         getattr(self, f'{type}_module').append(module)
         getattr(self, f'{type}_dic').append(getattr(modi_dic, f'{module}_dic'))
         self.code += f"{module} = bundle.{module}s[0]\n"
