@@ -122,4 +122,4 @@ def edit(type, text):
         except:
             distance.append((key, levenshtein(text, key)))
     distance.sort(key = lambda x:x[1])
-    return distance[0][0]
+    return distance[0][0], distance[0][1]
