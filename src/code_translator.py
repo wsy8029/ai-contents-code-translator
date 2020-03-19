@@ -1,10 +1,8 @@
 from konlpy.tag import Komoran
 import modi_dic
 import text_process
-import modi
 import re
 import time
-import traceback
 import sys
 import keyboard
 
@@ -18,6 +16,8 @@ class CodeTranslator(object):
 
     #initialize for new sentence
     def initial(self):
+        self.block = []
+
         self.input_module = []
         self.output_module = []
 
