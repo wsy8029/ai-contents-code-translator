@@ -124,7 +124,7 @@ class CodeTranslator(object):
         for morph in phrase:
             try:
                 phrase_code += dic[morph] # 'distance()'
-            except:
+            except KeyError:
                 pass
         # Return value exists
         if value is not None:
@@ -135,7 +135,7 @@ class CodeTranslator(object):
     Set input parameters to code
     input:  value - 30
             operand - '보다 작을'
-    returns: ' > 30'
+    returns: ' < 30'
     '''
     def set_input_param(self, value, operand):
         param_code = ""
