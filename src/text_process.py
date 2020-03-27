@@ -113,7 +113,7 @@ def jamo_levenshtein(s1, s2, debug=False):
 
     return previous_row[-1]
 
-def edit(type, text): 
+def edit_distance(type, text): 
     distance = []
     dic = getattr(modi_dic, f'{type}_module_dic')
     for key in dic.keys():
