@@ -6,13 +6,13 @@ input_module_dic = {
         "환경":"env", "environment":"env", "Environment":"env", "Env":"env", "env":"env",
         "Gyroscope":"gyro", "gyroscope":"gyro", "Gyro":"gyro", "gyro":"gyro", "자이로":"gyro", "자이로스코프":"gyro",
         "IR":"ir", "infrared":"ir", "적외선":"ir", "ir":"ir",
-        "마이크":"mic", "Mic":"mic", "mic":"mic",
+        "마이크":"mic", "Mic":"mic", "mic":"mic", "microphone":"mic", "Microphone":"mic",
         "울트라소닉":"ultrasonic", "초음파":"ultrasonic", "Ultrasonic":"ultrasonic", "ultrasonic":"ultrasonic"
         }
 
 output_module_dic = {
         #actuator
-        "디스플레이":"display", "Display":"display", "display":"display",
+        "화면":"display", "디스플레이":"display", "Display":"display", "display":"display",
         "불":"led", "led 불":"led", "led불":"led", "LED":"led", "led":"led",
         "모터":"motor", "Motor":"motor", "motor":"motor",
         "스피커":"speaker", "Speaker":"speaker", "speaker":"speaker"
@@ -30,10 +30,10 @@ cond_dic = {
 operand_dic = {
         "거나":"or", "고":"and",
         "보다 클":">", "보다 크":">", "크":">",
-        "보다 크거나 같":">=", "이상":">=",
+        "이상":">=",
         "아닐":"!=", "아니":"!=",
         "보다 작":"<", "작":"<",
-        "보다 작거나 같":"<=", "이하":"<="
+        "이하":"<="
         }
 
 else_dic = {
@@ -115,7 +115,7 @@ motor_dic = {
         }
 
 speaker_dic = {
-        "음정":"tune(",
+        "음정":"tune(", "튠":"tune(",
         "진동수":"frequency(",
-        "음량":"volume(", "볼륨":"volume("
+        "음량":"volume(", "볼륨":"volume(", "크기":"volume("
         }
