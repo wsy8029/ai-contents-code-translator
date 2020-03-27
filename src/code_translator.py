@@ -5,6 +5,7 @@ import re
 import time
 import sys
 import keyboard
+import traceback
 
 class CodeTranslator(object):
 
@@ -242,6 +243,7 @@ class CodeTranslator(object):
                 self.code += "\n\tif keyboard.is_pressed(' '):\n\t\tbreak"
                 exec(self.code)
             except:
+                traceback.print_exc()
                 print("Try again")
         bundle.exit()
         sys.exit()
