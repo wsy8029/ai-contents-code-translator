@@ -1,4 +1,2 @@
-# content-based-filtering
-Implement Recommender System using CB(content based filtering)
-
-ref: https://simonezz.tistory.com/21?category=852348
+# MODI Code Translator using NLP
+<img src="/src/modi_nlp_concept.png"></img>
