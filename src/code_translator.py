@@ -114,10 +114,10 @@ class CodeTranslator(object):
         dic = getattr(self, f"{type_}_dic")[index]
         # Output module
         if type_ == "output":
-            phrase_code = f"{module}.set_"
+            phrase_code = f"{module}."
         # Input module
         elif type_ == "input":
-            phrase_code = f"{module}.get_" # 'ultrasonic.get_'
+            phrase_code = f"{module}." # 'ultrasonic.get_'
         # Extract value and operand
         phrase, value, operand = self.split_phrase(phrase) # '초음파 거리가 30보다 작을 -> '초음파 거리가', '30', '보다 작을'
         # method

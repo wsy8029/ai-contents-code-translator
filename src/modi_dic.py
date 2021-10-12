@@ -38,7 +38,7 @@ operand_dic = {
 
 else_dic = {
         "display":"display.set_clear()",
-        "led":"led.set_off()",
+        "led":"led.turn_off()",
         "motor":"motor.set_speed(0,0)",
         "speaker":"speaker.set_volume(0)"
         }
@@ -48,7 +48,7 @@ button_dic = {
         "클릭":"clicked()",
         "두":"double_", "두번":"double_",
         "더블 클릭":"double_clicked()", "더블클릭":"double_clicked()",
-        "누르":"pressed()", "눌리":"pressed()"
+        "누르":"pressed", "눌리":"pressed"
         }
 
 dial_dic = {
@@ -88,7 +88,7 @@ mic_dic = {
         }     
 
 ultrasonic_dic = {
-        "거리":"distance()"
+        "거리":"distance"
         }
 
 #output modules
@@ -99,8 +99,8 @@ display_dic = {
 
 led_dic = {
         "rgb":"rgb(",
-        "켜":"on()",
-        "끄":"off()", "꺼":"off()",
+        "켜":"turn_on()",
+        "끄":"turn_off()", "꺼":"turn_off()",
         "빨갛":"red(255)", "빨간":"red(255)", "빨강색":"red(255)", "빨간색":"red(255)",
         "초록":"green(255)", "초록색":"green(255)",
         "파랗":"blue(255)", "파란":"blue(255)", "파랑색":"blue(255)", "파란색":"blue(255)"
