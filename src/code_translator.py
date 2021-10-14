@@ -157,7 +157,7 @@ class CodeTranslator(object):
     returns: '30)'
     '''
     def set_output_param(self, value, operand):
-        return f"{value})" # '30)'
+        return f"{value}" # '30)'
 
     '''
     Set input and output modules and their dictionaries

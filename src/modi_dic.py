@@ -39,7 +39,7 @@ operand_dic = {
 else_dic = {
         "display":"display.set_clear()",
         "led":"led.turn_off()",
-        "motor":"motor.set_speed(0,0)",
+        "motor":"motor.speed = 0,0",
         "speaker":"speaker.set_volume(0)"
         }
 
@@ -52,8 +52,8 @@ button_dic = {
         }
 
 dial_dic = {
-        "각도":"degree()",
-        "속도":"turnspeed()"
+        "각도":"degree",
+        "속도":"turnspeed"
         }
 
 env_dic = {
@@ -109,9 +109,9 @@ led_dic = {
 motor_dic = {
         "첫":"first_",
         "두":"second_",
-        "토크":"torque(",
-        "속도":"speed(",
-        "각도":"degree("
+        "토크":"torque = ",
+        "속도":"speed = ",
+        "각도":"degree = "
         }
 
 speaker_dic = {
